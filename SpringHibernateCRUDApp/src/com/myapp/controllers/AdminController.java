@@ -69,7 +69,7 @@ public class AdminController {
 		int x=d.insertEmp(e);
 		if(x==1)
 		{
-			mv=new ModelAndView("views/newemp","msg","Data Inserted Successfully...");
+			mv=new ModelAndView("views/newemp","msg","Data Inserted Successfully... By Hibernate Code");
 		}
 		else
 		{

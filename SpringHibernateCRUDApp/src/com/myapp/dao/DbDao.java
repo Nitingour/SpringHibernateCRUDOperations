@@ -17,10 +17,15 @@ import java.util.Properties;
 //import javax.mail.internet.InternetAddress;
 //import javax.mail.internet.MimeMessage;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.AnnotationConfiguration;
+
 import com.myapp.beans.EmployeeBean;
 
 
-
+//DAO Class
 public class DbDao {
 
 	public Connection start()
@@ -60,31 +65,43 @@ public class DbDao {
   {
 	  
 	  int x=0;
-		try(Connection con=start()) {
-	PreparedStatement ps=con.prepareStatement("insert into employee values(?,?,?,?,?,?,?)");
-	ps.setInt(1,e.getEid());
-	ps.setString(2,e.getEname());
-	ps.setDouble(3,e.getSalary());
-	ps.setString(4,e.getAddress());
-	ps.setString(5,e.getEmail());
-	//java.util.Date d=e.getJoiningdate();
-	//java.sql.Date sqldate=new java.sql.Date(d.getTime());
-	ps.setDate(6,e.getJoiningdate());
-
-	 long l=System.currentTimeMillis();//1 jan 1970 00:00AM ---> till  243854239857345987324
-	 String p=l+""; //"243854239857345987324"
-	 String pwd=p.substring(8);
-	 ps.setString(7,pwd);
-	   x=ps.executeUpdate();
-	   if(x!=0)
-	   {
-		  // String msg="Congrats your empid:"+e.getEid()+" and password is:"+pwd;
-		  // sendMail(e.getEmail(),"EMS System Password",msg)  ;
-	   }
-		}catch(SQLException ex)
-		{
-			System.out.println(ex);
-		}
+	  //CM + TM +HQL execute
+	//Class.forName
+	  SessionFactory sf= new AnnotationConfiguration(). configure().buildSessionFactory();
+	  //Connection
+	  Session session=sf.openSession();
+	  Transaction transaction=session.beginTransaction();
+	Object o=session.save(e);//Insert 
+	if(o!=null)
+		x=1;
+	transaction.commit();
+	  session.close();
+	  
+//		try(Connection con=start()) {
+//	PreparedStatement ps=con.prepareStatement("insert into employee values(?,?,?,?,?,?,?)");
+//	ps.setInt(1,e.getEid());
+//	ps.setString(2,e.getEname());
+//	ps.setDouble(3,e.getSalary());
+//	ps.setString(4,e.getAddress());
+//	ps.setString(5,e.getEmail());
+//	//java.util.Date d=e.getJoiningdate();
+//	//java.sql.Date sqldate=new java.sql.Date(d.getTime());
+//	ps.setDate(6,e.getJoiningdate());
+//
+//	 long l=System.currentTimeMillis();//1 jan 1970 00:00AM ---> till  243854239857345987324
+//	 String p=l+""; //"243854239857345987324"
+//	 String pwd=p.substring(8);
+//	 ps.setString(7,pwd);
+//	   x=ps.executeUpdate();
+//	   if(x!=0)
+//	   {
+//		  // String msg="Congrats your empid:"+e.getEid()+" and password is:"+pwd;
+//		  // sendMail(e.getEmail(),"EMS System Password",msg)  ;
+//	   }
+//		}catch(SQLException ex)
+//		{
+//			System.out.println(ex);
+//		}
 		return x;
 	  
   }

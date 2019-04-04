@@ -2,7 +2,14 @@ package com.myapp.beans;
 
 import java.sql.Date;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="Employee")
 public class EmployeeBean {
+@Id	
 int eid;
 String ename,email,address;
 double salary;
