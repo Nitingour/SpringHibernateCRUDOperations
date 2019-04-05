@@ -29,10 +29,10 @@
 
 <div class="col-sm-6">
   <form action="EmpInsert" method="post" >
-    <div class="form-group">
+   <!--  <div class="form-group">
       <label for="email">EID:</label>
       <input type="text" class="form-control" id="email" placeholder="Enter loginid" name="eid" required />
-    </div>
+    </div> -->
     <div class="form-group">
       <label for="pwd">Name:</label>
       <input type="text" class="form-control" id="pwd" placeholder="Enter name" name="ename" required>

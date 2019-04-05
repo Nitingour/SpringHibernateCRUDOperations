@@ -2,18 +2,33 @@ package com.myapp.beans;
 
 import java.sql.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="Employee")
 public class EmployeeBean {
 @Id	
+@Column(name="empid")
+@GeneratedValue
 int eid;
 String ename,email,address;
 double salary;
 Date joiningdate;
+//@Temporal(value = TemporalType.TIMESTAMP)
+//java.util.Date createdDate;
+//
+//public java.util.Date getCreatedDate() {
+//	return createdDate;
+//}
+//public void setCreatedDate(java.util.Date createdDate) {
+//	this.createdDate = createdDate;
+//}
 public int getEid() {
 	return eid;
 }

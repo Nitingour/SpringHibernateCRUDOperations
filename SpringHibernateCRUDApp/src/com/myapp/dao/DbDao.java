@@ -1,5 +1,6 @@
 package com.myapp.dao;
 
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -7,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 //
 //import javax.mail.Message;
@@ -17,17 +20,30 @@ import java.util.Properties;
 //import javax.mail.internet.InternetAddress;
 //import javax.mail.internet.MimeMessage;
 
+import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 
 import com.myapp.beans.EmployeeBean;
+import com.myapp.beans.LoginBean;
 
 
 //DAO Class
 public class DbDao {
 
+	public Session getSession()
+	{
+		Session session=null;
+		SessionFactory sf= new AnnotationConfiguration().configure().buildSessionFactory();
+		session=sf.openSession();
+		return session;
+	}
+	
 	public Connection start()
 	{
 		Connection con=null;
@@ -43,20 +59,30 @@ public class DbDao {
 	}
 	
 	
-	public int loginCheck(String uid,String pwd)
+	public int loginCheck(String u,String p)
 	{
 		int x=0;
-		try(Connection con=start()) {
-	PreparedStatement ps=con.prepareStatement("select * from login where uid=? and password=?");
-	ps.setString(1,uid);
-	ps.setString(2,pwd);
-	    ResultSet rs=ps.executeQuery();
-		if(rs.next())
-			x=1;
-		}catch(SQLException e)
-		{
-			System.out.println(e);
-		}
+		
+		Session session=getSession();
+		Criteria ct=session.createCriteria(LoginBean.class);
+		//select * from login where uid=u and password=p
+		ct.add(Restrictions.eq("uid",u));
+		ct.add(Restrictions.eq("password",p));
+		List list=(List)ct.list();
+		if(!list.isEmpty())
+		  x=1;
+	
+//		try(Connection con=start()) {
+//	PreparedStatement ps=con.prepareStatement("select * from login where uid=? and password=?");
+//	ps.setString(1,uid);
+//	ps.setString(2,pwd);
+//	    ResultSet rs=ps.executeQuery();
+//		if(rs.next())
+//			x=1;
+//		}catch(SQLException e)
+//		{
+//			System.out.println(e);
+//		}
 		return x;
 		
 	}
@@ -146,94 +172,157 @@ public class DbDao {
 	 */	
   public ArrayList<EmployeeBean>  viewAllEmp()
   {
-	  ArrayList<EmployeeBean> list=new ArrayList<EmployeeBean>();
-	  
-		try(Connection con=start()) {
-			PreparedStatement ps=con.prepareStatement("select * from Employee");
-			 ResultSet rs=ps.executeQuery();
-				while(rs.next())
-			     {
-				   EmployeeBean e=new EmployeeBean();
-				   e.setEid(rs.getInt("eid"));
-				   e.setEname(rs.getString("ename"));
-				   e.setSalary(rs.getDouble("salary"));	
-				   e.setEmail(rs.getString("email"));
-				   e.setAddress(rs.getString("address"));
-				   e.setJoiningdate(rs.getDate("joiningdate"));
-                  list.add(e);
-			     }
-				}catch(SQLException e)
-				{
-					System.out.println(e);
-				}
-	  
-	  
-	  
+	  Session session=getSession();
+	  Criteria ct=session.createCriteria(EmployeeBean.class);//select * from employee
+	//select * from employee where ename='kkk'   ===> 1
+	  //  ct.add(Restrictions.eq("ename","kkk"));
+	//select * from employee where salary>15000 ====>1
+	   //ct.add(Restrictions.gt("salary",15000.00));
+	//select * from employee where salary>=15000 ====>2
+	 // ct.add(Restrictions.ge("salary",15000.00));
+	//select * from employee where empid=2 ====>1
+	//  ct.add(Restrictions.eq("eid",2));
+	 //   select * from employee where ename like '%kumar%';
+	 // ct.add(Restrictions.like("ename","kUmAr" ,MatchMode.ANYWHERE));
+	  ArrayList<EmployeeBean> list=( ArrayList<EmployeeBean>)ct.list();
 	  return list;
+	   
+//	ArrayList<EmployeeBean> list=new ArrayList<EmployeeBean>();
+//	Session session=getSession();
+//	//String sql="select * from employee";  seLEct empid,address from employee SQL- Insensitive
+//	String hql="from EmployeeBean"; //select eid,address from EmployeeBean;  HQL- Case sensitive
+//	Query q=session.createQuery(hql);  // PS ps
+//	 Iterator it=q.iterate();         //ResultSet rs=ps.executeQuery();
+//	while(it.hasNext())
+//	{
+//		EmployeeBean e=(EmployeeBean)it.next();
+//		list.add(e);
+//	}
+//	//session.close();
+//	return list;	
+//	  ArrayList<EmployeeBean> list=new ArrayList<EmployeeBean>();
+//	  
+//		try(Connection con=start()) {
+//			PreparedStatement ps=con.prepareStatement("select * from Employee");
+//			 ResultSet rs=ps.executeQuery();
+//				while(rs.next())
+//			     {
+//				   EmployeeBean e=new EmployeeBean();
+//				   e.setEid(rs.getInt("eid"));
+//				   e.setEname(rs.getString("ename"));
+//				   e.setSalary(rs.getDouble("salary"));	
+//				   e.setEmail(rs.getString("email"));
+//				   e.setAddress(rs.getString("address"));
+//				   e.setJoiningdate(rs.getDate("joiningdate"));
+//                  list.add(e);
+//			     }
+//				}catch(SQLException e)
+//				{
+//					System.out.println(e);
+//				}
+//	  return list;
   }
   
   
   public int deleteEmp(int eid)
   {
-	  
 	  int x=0;
-		try(Connection con=start()) {
-	PreparedStatement ps=con.prepareStatement("delete from employee where eid=?");
-	ps.setInt(1,eid);
-	   x=ps.executeUpdate();
-		}catch(SQLException ex)
-		{
-			System.out.println(ex);
-		}
-		return x;
+	  Session session=getSession();
+	  Transaction tt=session.beginTransaction();
+//String sql="delete from employee where empid=?";
+	  String hql="delete from EmployeeBean where eid=:xyz";
+	  Query q=session.createQuery(hql);
+	  q.setInteger("xyz",eid);
+	   x=q.executeUpdate();
+	  //	  EmployeeBean e=new EmployeeBean();
+//	  e.setEid(eid);
+//	  session.delete(e);
+	  tt.commit();
+	  return x;
 	  
+	  
+	  
+//	  int x=0;
+//		try(Connection con=start()) {
+//	PreparedStatement ps=con.prepareStatement("delete from employee where eid=?");
+//	ps.setInt(1,eid);
+//	   x=ps.executeUpdate();
+//		}catch(SQLException ex)
+//		{
+//			System.out.println(ex);
+//		}
+//		return x;
+//	  
   }
   
   public EmployeeBean  viewEmpbyID(int eid)
   {
-	  EmployeeBean e=new EmployeeBean();
+	  //get one record by pk
 	  
-		try(Connection con=start()) {
-			PreparedStatement ps=con.prepareStatement("select * from Employee where eid=?");
-			ps.setInt(1,eid);
-			 ResultSet rs=ps.executeQuery();
-				while(rs.next())
-			     {
-				  
-				   e.setEid(rs.getInt("eid"));
-				   e.setEname(rs.getString("ename"));
-				   e.setSalary(rs.getDouble("salary"));	
-				   e.setEmail(rs.getString("email"));
-				   e.setAddress(rs.getString("address"));
-				   e.setJoiningdate(rs.getDate("joiningdate"));
-                
-			     }
-				}catch(SQLException ex)
-				{
-					System.out.println(e);
-				}
+	  Session session=getSession();
+	//  EmployeeBean e=(EmployeeBean)session.get(EmployeeBean.class, eid);  //always hit DB
+	  EmployeeBean e=(EmployeeBean)session.load(EmployeeBean.class, eid); //first time hit db other time cache
 	  return e;
+	  
+//	  EmployeeBean e=new EmployeeBean();
+//	  
+//		try(Connection con=start()) {
+//			PreparedStatement ps=con.prepareStatement("select * from Employee where eid=?");
+//			ps.setInt(1,eid);
+//			 ResultSet rs=ps.executeQuery();
+//				while(rs.next())
+//			     {
+//				  
+//				   e.setEid(rs.getInt("eid"));
+//				   e.setEname(rs.getString("ename"));
+//				   e.setSalary(rs.getDouble("salary"));	
+//				   e.setEmail(rs.getString("email"));
+//				   e.setAddress(rs.getString("address"));
+//				   e.setJoiningdate(rs.getDate("joiningdate"));
+//                
+//			     }
+//				}catch(SQLException ex)
+//				{
+//					System.out.println(e);
+//				}
+//	  return e;
   }
 
 
 public int updateEmp(EmployeeBean e) {
 	  int x=0;
-			try(Connection con=start()) {
-		PreparedStatement ps=con.prepareStatement("update employee set ename=?,salary=?,email=?,address=?,joiningdate=? where eid=?");
-		ps.setInt(6,e.getEid());
-		ps.setString(1,e.getEname());
-		ps.setDouble(2,e.getSalary());
-		ps.setString(4,e.getAddress());
-		ps.setString(3,e.getEmail());
-		java.util.Date d=e.getJoiningdate();
-		java.sql.Date sqldate=new java.sql.Date(d.getTime());
-		ps.setDate(5,sqldate);
-		   x=ps.executeUpdate();
-		 	}catch(SQLException ex)
-			{
-				System.out.println(ex);
-			}
-			return x;
+	 
+	  Session session=getSession();
+	  Transaction tt=session.beginTransaction();
+//	   session.update(e);
+//	     x=1;
+ 	String hql="update EmployeeBean set ename=:a,email=:b,address=:c,salary=:d where eid=:e";
+	  Query q=session.createQuery(hql);
+	  q.setString("a", e.getEname());
+	  q.setString("b", e.getEmail());
+	  q.setString("c",e.getAddress());
+	  q.setDouble("d", e.getSalary());
+	  q.setInteger("e",e.getEid());
+	  x=q.executeUpdate();
+	  tt.commit();
+	  return x;
+	  
+//			try(Connection con=start()) {
+//		PreparedStatement ps=con.prepareStatement("update employee set ename=?,salary=?,email=?,address=?,joiningdate=? where eid=?");
+//		ps.setInt(6,e.getEid());
+//		ps.setString(1,e.getEname());
+//		ps.setDouble(2,e.getSalary());
+//		ps.setString(4,e.getAddress());
+//		ps.setString(3,e.getEmail());
+//		java.util.Date d=e.getJoiningdate();
+//		java.sql.Date sqldate=new java.sql.Date(d.getTime());
+//		ps.setDate(5,sqldate);
+//		   x=ps.executeUpdate();
+//		 	}catch(SQLException ex)
+//			{
+//				System.out.println(ex);
+//			}
+//			return x;
 }
   
   

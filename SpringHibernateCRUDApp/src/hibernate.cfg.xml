@@ -10,6 +10,7 @@
     <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
     <property name="hibernate.hbm2ddl.auto">update</property>
     <mapping class="com.myapp.beans.EmployeeBean"/>
+     <mapping class="com.myapp.beans.LoginBean"/>
   </session-factory>
 </hibernate-configuration>
 
